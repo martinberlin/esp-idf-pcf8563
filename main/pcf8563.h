@@ -1,5 +1,7 @@
 #pragma once
 
+// DATASHEET: https://www.nxp.com/docs/en/data-sheet/PCF8563.pdf
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -11,7 +13,7 @@ extern "C" {
 #include "i2cdev.h"
 
 #define PCF8563_ADDR 0x51 //!< I2C address
-// In () https://github.com/lewisxhe/PCF8563_Library/blob/master/src/pcf8563.h
+// In https://github.com/lewisxhe/PCF8563_Library/blob/master/src/pcf8563.h
 #define PCF8563_ADDR_STATUS1 0x00
 #define PCF8563_ADDR_STATUS2 0x01
 #define PCF8563_SEC_REG      0x02
@@ -46,13 +48,20 @@ extern "C" {
 #define PCF8563_ALARM_ENABLE    (0x80)
 #define PCF8563_CLK_ENABLE      (0x80)
 
+// Real-time  8.8.1 Register Timer_control
 enum {
+    PCF8563_CLK_4096HZ,
+    PCF8563_CLK_64HZ,     // Giving 30 per second
+    PCF8563_CLK_1HZ,       // per Second
+    PCF8563_CLK_1_div_60HZ // timer Minute
+};
+// Original
+/* enum {
     PCF8563_CLK_32_768KHZ,
     PCF8563_CLK_1024KHZ,
     PCF8563_CLK_32HZ,
-    PCF8563_CLK_1HZ,
-    PCF8563_CLK_MAX
-};
+    PCF8563_CLK_1HZ
+}; */
 
 uint8_t bcd2dec(uint8_t val);
 uint8_t dec2bcd(uint8_t val);
@@ -63,15 +72,18 @@ esp_err_t pcf8563_get_time(i2c_dev_t *dev, struct tm *time);
 // New functions: Need additional testing
 uint8_t check_err(esp_err_t res, uint8_t * data, uint16_t size, char * op);
 
-uint8_t pcf8563_get_flags(i2c_dev_t *dev);                // Gets and clears Flags
-void pcf8563_set_clock_out(i2c_dev_t *dev, uint8_t mode); // Not tested
-void pcf8563_set_timer(i2c_dev_t *dev, uint8_t val, uint8_t freq); // Sets an interrupt
-void pcf8563_enable_timer(i2c_dev_t *dev);
-esp_err_t pcf8563_enable_clock(i2c_dev_t *dev, uint8_t freq);
+uint8_t pcf8563_get_flags(i2c_dev_t *dev);
+void pcf8563_set_timer(i2c_dev_t *dev, uint8_t freq, uint8_t count); // Sets an interrupt
+void pcf8563_enable_timer(i2c_dev_t *dev); // Needs to be tested
+esp_err_t pcf8563_set_clock_out(i2c_dev_t *dev, uint8_t freq);
+esp_err_t pcf8563_set_clock_out2(i2c_dev_t *dev, uint8_t freq); // Different version from LewisXhe
 
 uint8_t pcf8563_get_timer(i2c_dev_t *dev);
+bool pcf8563_is_timer_active(i2c_dev_t *dev);
 esp_err_t pcf8563_set_alarm(i2c_dev_t *dev, struct tm *time);
 esp_err_t pcf8563_enable_alarm(i2c_dev_t *dev);
+esp_err_t pcf8563_disable_alarm(i2c_dev_t *dev);
+esp_err_t pcf8563_reset_alarm(i2c_dev_t *dev);
 
 #ifdef __cplusplus
 }
