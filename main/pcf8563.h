@@ -48,20 +48,13 @@ extern "C" {
 #define PCF8563_ALARM_ENABLE    (0x80)
 #define PCF8563_CLK_ENABLE      (0x80)
 
-// Real-time  8.8.1 Register Timer_control
+// 8.8.1 Register Timer_control
 enum {
     PCF8563_CLK_4096HZ,
     PCF8563_CLK_64HZ,     // Giving 30 per second
     PCF8563_CLK_1HZ,       // per Second
     PCF8563_CLK_1_div_60HZ // timer Minute
 };
-// Original
-/* enum {
-    PCF8563_CLK_32_768KHZ,
-    PCF8563_CLK_1024KHZ,
-    PCF8563_CLK_32HZ,
-    PCF8563_CLK_1HZ
-}; */
 
 uint8_t bcd2dec(uint8_t val);
 uint8_t dec2bcd(uint8_t val);
@@ -69,7 +62,7 @@ esp_err_t pcf8563_init_desc(i2c_dev_t *dev, i2c_port_t port, gpio_num_t sda_gpio
 esp_err_t pcf8563_reset(i2c_dev_t *dev);
 esp_err_t pcf8563_set_time(i2c_dev_t *dev, struct tm *time);
 esp_err_t pcf8563_get_time(i2c_dev_t *dev, struct tm *time);
-// New functions: Need additional testing
+// New functions: Need additional testing specially the pcf8563_set_alarm
 uint8_t check_err(esp_err_t res, uint8_t * data, uint16_t size, char * op);
 
 uint8_t pcf8563_get_flags(i2c_dev_t *dev);
