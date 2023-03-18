@@ -73,8 +73,9 @@ esp_err_t pcf8563_set_clock_out2(i2c_dev_t *dev, uint8_t freq); // Different ver
 
 uint8_t pcf8563_get_timer(i2c_dev_t *dev);
 bool pcf8563_is_timer_active(i2c_dev_t *dev);
+// ALARM
 esp_err_t pcf8563_set_alarm(i2c_dev_t *dev, struct tm *time);
-esp_err_t pcf8563_enable_alarm(i2c_dev_t *dev);
+// Did not try this two they might go away in further reviews
 esp_err_t pcf8563_disable_alarm(i2c_dev_t *dev);
 esp_err_t pcf8563_reset_alarm(i2c_dev_t *dev);
 

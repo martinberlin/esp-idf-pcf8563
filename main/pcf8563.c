@@ -191,37 +191,38 @@ esp_err_t pcf8563_set_alarm(i2c_dev_t *dev, struct tm *time)
     CHECK_ARG(dev);
     CHECK_ARG(time);
     // Minimal validation time struct
-    if (time->tm_hour > 23 || time->tm_min > 60 || time->tm_sec > 60) {
-        ESP_LOGE("pcf8563_set_alarm", "time struct not valid HH:%d MM:%d SEC:%d",
-        time->tm_hour, time->tm_min, time->tm_sec);
+    if ((time->tm_hour > 23 && time->tm_hour != -1) || time->tm_min > 59) {
+        ESP_LOGE("pcf8563_set_alarm", "time struct not valid HH:%d MM:%d",
+        time->tm_hour, time->tm_min);
         return ESP_ERR_INVALID_ARG;
     }
 
-    uint8_t data[7];
+    uint8_t data[4];
     /* time/date data */
-    data[0] = dec2bcd(time->tm_sec);
-    data[1] = dec2bcd(time->tm_min);
-    data[2] = dec2bcd(time->tm_hour);
-    data[3] = dec2bcd(time->tm_mday);
-    data[4] = dec2bcd(time->tm_wday);		// tm_wday is 0 to 6
-    data[5] = dec2bcd(time->tm_mon + 1);	// tm_mon is 0 to 11
-    data[6] = dec2bcd(time->tm_year - 2000);
+    data[0] = dec2bcd(time->tm_min) & 0xFF;
+    /**
+     * @brief The idea was that passing this values like -1 
+     * that alarm part should be ignored like it says in datasheet:
+     * bit:7 AE_W with 0 value should ignore that alarm
+     */
+    if (time->tm_hour==-1) {
+      data[1] = 0xFF;
+    } else {
+      data[1] = dec2bcd(time->tm_hour) & 0xBF;
+    }
+    if (time->tm_mday==-1) {
+      data[2] = 0xFF;
+    } else {
+      data[2] = dec2bcd(time->tm_mday) & 0xBF;
+    }
+    if (time->tm_wday==-1) {
+      data[3] = 0xFF;
+    } else {
+      data[3] = dec2bcd(time->tm_wday) & 0x87;
+    }
 
-    esp_err_t res = i2c_dev_write_reg(dev, PCF8563_ALRM_MIN_REG, data, 7);
-    check_err(res, data, 7, "pcf8563_set_alarm write_reg 0x09 failed");
-    return res;
-}
-
-esp_err_t pcf8563_enable_alarm(i2c_dev_t *dev) {
-    uint8_t _data[1];
-    esp_err_t res = i2c_dev_read_reg(dev, PCF8563_ADDR_STATUS2, &_data, 1);
-    check_err(res, _data, 1, "pcf8563_enable_alarm read_reg 0x01 failed");
-
-    _data[0] &= ~PCF8563_ALARM_AF;
-    _data[0] |= (PCF8563_TIMER_TF | PCF8563_ALARM_AIE);
-
-    res = i2c_dev_write_reg(dev, PCF8563_ADDR_STATUS2, _data, 1);
-    check_err(res, _data, 1, "pcf8563_set_alarm write_reg 0x01 failed");
+    esp_err_t res = i2c_dev_write_reg(dev, PCF8563_ALRM_MIN_REG, data, 4);
+    check_err(res, data, 4, "pcf8563_set_alarm write_reg 0x09 failed");
     return res;
 }
 
