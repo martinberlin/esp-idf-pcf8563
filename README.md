@@ -1,7 +1,9 @@
 # esp-idf-pcf8563
-PCF8563 RTC Driver for esp-idf
 
-# Installation
+PCF8563 RTC Driver for ESP-IDF
+
+## Installation
+
 ```
 git clone https://github.com/martinberlin/esp-idf-pcf8563.git
 cd esp-idf-pcf8563
@@ -13,7 +15,7 @@ idf.py flash
 
 Proven to work configurations
 
-|PCF8563||ESP32||ESP32-C3|
+|PCF8563||ESP32|ESP32-C3|
 |:-:|:-:|:-:|:-:|
 |SCL|--|IO22(*1)|IO4|
 |SDA|--|IO21(*1)|IO5|
@@ -34,10 +36,10 @@ There in the folder **/main/switch/rtc** there is a pcf8563-switch.cpp that impl
 
 ```C
   tm alarm; // C timestruct
-  http://alarm.tm_hour = 15;
-  http://alarm.tm_min = 0;
-  http://alarm.tm_mday = -1;
-  http://alarm.tm_wday = -1;
+  alarm.tm_hour = 15;
+  alarm.tm_min = 0;
+  alarm.tm_mday = -1;
+  alarm.tm_wday = -1;
   pcf8563_set_alarm(&i2c, &alarm);
 ```
 
